@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Random Swap Co-op - Game</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body class="game">
+    <header class="hud">
+      <div id="rolePill" class="pill">Role: -</div>
+      <div id="roundInfo">Round 1 / 3</div>
+      <div id="timerInfo">60s</div>
+      <div id="scoreInfo">You 0 - Opp 0</div>
+      <div id="progressInfo">Runner dots 0/5 | Tags 0/2</div>
+    </header>
+    <button id="audioToggle" class="audio-toggle">Sound: On</button>
+
+    <section id="swapCue" class="swap-cue hidden">SWAP INCOMING</section>
+    <section id="roleFlash" class="role-flash hidden">RUN!</section>
+    <canvas id="gameCanvas" width="1000" height="1000" aria-label="Game canvas"></canvas>
+
+    <section class="mobile-controls">
+      <div id="joystickBase" class="joystick-base">
+        <div id="joystickKnob" class="joystick-knob"></div>
+      </div>
+    </section>
+
+    <section id="resultOverlay" class="result-overlay hidden">
+      <div class="result-card">
+        <h2 id="resultTitle">Match Finished</h2>
+        <p id="resultSubtitle">You win!</p>
+        <div id="resultScore" class="result-score">You 0 - Opp 0</div>
+        <div class="result-actions">
+          <button id="playAgainBtn" class="primary">Play Again</button>
+          <button id="backLobbyBtn">Back to Lobby</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="statusLine" class="status-line">Connecting...</section>
+    <script type="module" src="./js/game.js"></script>
+  </body>
+</html>

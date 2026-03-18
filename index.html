@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Random Swap Co-op</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body class="landing">
+    <main class="card">
+      <h1>Random Swap Co-op</h1>
+      <p class="subtitle">Cute chaos for two players. Roles swap at random.</p>
+
+      <section class="form-block">
+        <button id="createRoomBtn" class="primary">Create Room</button>
+      </section>
+
+      <section id="createdRoomPanel" class="form-block created-room hidden">
+        <label>Your room is ready</label>
+        <div id="createdRoomCode" class="room-code">-</div>
+        <div class="join-row">
+          <button id="copyCodeBtn">Copy Code</button>
+          <button id="copyLinkBtn">Copy Invite Link</button>
+        </div>
+        <button id="enterRoomBtn" class="primary secondary-cta">Enter Room</button>
+      </section>
+
+      <section class="form-block">
+        <label for="roomCodeInput">Join with code</label>
+        <div class="join-row">
+          <input id="roomCodeInput" type="text" placeholder="e.g. abc123" maxlength="12" />
+          <button id="joinRoomBtn">Join</button>
+        </div>
+      </section>
+
+      <section id="status" class="status">Ready.</section>
+      <p class="hint">Tip: configure Firebase in <code>js/firebase.js</code> before multiplayer.</p>
+    </main>
+
+    <script type="module" src="./js/lobby.js"></script>
+  </body>
+</html>
