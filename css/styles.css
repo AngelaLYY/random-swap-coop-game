@@ -258,13 +258,13 @@ button {
   pointer-events: none;
 }
 
-/* Invisible hit area for dynamic joystick: left half of screen on touch devices */
+/* Invisible hit area for dynamic joystick: left half, below HUD/buttons so Exit and HUD stay tappable */
 .mobile-controls-touch-zone {
   position: fixed;
   left: 0;
-  top: 0;
+  top: 110px; /* below HUD (~66px) + padding so Exit/Audio and HUD receive taps */
   width: 50%;
-  height: 100%;
+  height: calc(100% - 110px);
   z-index: 51;
   pointer-events: none;
 }

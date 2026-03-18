@@ -93,6 +93,7 @@ export function createInputController() {
     if (isTouchDevice && touchZone) {
       base.classList.add("dynamic");
       touchZone.classList.add("active");
+      const safeBottomPx = 24; /* reserve space above home indicator / safe area */
       touchZone.addEventListener("pointerdown", (e) => {
         if (active) return;
         e.preventDefault();
@@ -102,7 +103,7 @@ export function createInputController() {
         const bh = rect.height;
         const padding = 24;
         const x = Math.max(padding + bw / 2, Math.min(window.innerWidth - padding - bw / 2, e.clientX));
-        const y = Math.max(padding + bh / 2, Math.min(window.innerHeight - safeBottom - bh / 2, e.clientY));
+        const y = Math.max(padding + bh / 2, Math.min(window.innerHeight - safeBottomPx - bh / 2, e.clientY));
         base.style.left = `${x - bw / 2}px`;
         base.style.top = `${y - bh / 2}px`;
         base.style.bottom = "auto";
