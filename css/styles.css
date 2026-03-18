@@ -157,9 +157,24 @@ button {
   font-size: 12px;
 }
 
+.exit-game-btn {
+  position: fixed;
+  left: max(10px, env(safe-area-inset-left));
+  top: 66px;
+  z-index: 31;
+  background: #0f1734d9;
+  border: 1px solid #ffffff3f;
+  color: #e8ebff;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .audio-toggle {
   position: fixed;
-  right: 10px;
+  right: max(10px, env(safe-area-inset-right));
   top: 66px;
   z-index: 31;
   background: #0f1734d9;

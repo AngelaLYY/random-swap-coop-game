@@ -34,6 +34,7 @@ const resultTitle = document.getElementById("resultTitle");
 const resultSubtitle = document.getElementById("resultSubtitle");
 const resultScore = document.getElementById("resultScore");
 const playAgainBtn = document.getElementById("playAgainBtn");
+const exitGameBtn = document.getElementById("exitGameBtn");
 const backLobbyBtn = document.getElementById("backLobbyBtn");
 let lastIsRunner = null;
 let roleFlashTimeout = null;
@@ -85,10 +86,16 @@ if (audioToggle) {
   });
 }
 
+function goToLobby() {
+  window.location.href = "./index.html";
+}
+
+if (exitGameBtn) {
+  exitGameBtn.addEventListener("click", goToLobby);
+}
+
 if (backLobbyBtn) {
-  backLobbyBtn.addEventListener("click", () => {
-    window.location.href = "./index.html";
-  });
+  backLobbyBtn.addEventListener("click", goToLobby);
 }
 
 if (playAgainBtn) {
