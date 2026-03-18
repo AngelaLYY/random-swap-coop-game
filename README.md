@@ -1,145 +1,86 @@
 # Random Swap Co-op Game
 
-Two-player browser game for phones/laptops where one player runs, one chases, and roles swap at random intervals.
+Two-player browser game for phones/laptops where one player runs, one chases, and roles swap at random times.
 
-## Stack
+## Features
+
+- Real-time 2-player room play (share code/link)
+- Runner vs Chaser asymmetric roles
+- Random role swaps with on-screen + voice cues
+- Cute role-colored dots with growth/shrink mechanics
+- Mobile joystick controls
+- Match result overlay with replay flow
+
+## Tech stack
 
 - Vanilla HTML/CSS/JS
 - Canvas 2D
-- Firebase Realtime Database (for room sync)
-- Static hosting via GitHub Pages
+- Firebase Realtime Database + Anonymous Auth
+- GitHub Pages static hosting
 
-## Firebase setup guide (step-by-step)
+## Project structure
 
-### 1) Create a Firebase project
+- `index.html` - Create / join room flow
+- `game.html` - Gameplay screen
+- `css/styles.css` - UI and responsive styles
+- `js/*.js` - Game loop, render, input, audio, Firebase sync
+- `assets/audio/*` - Optional custom audio files
 
-1. Go to [Firebase Console](https://console.firebase.google.com/).
-2. Click **Create a project**.
-3. Give it a name (example: `random-swap-coop`), continue, and finish setup.
+## Quick start (local)
 
-### 2) Register a Web app
+1. Configure Firebase in `js/firebase.js`.
+2. Serve this folder:
 
-1. Inside the Firebase project, click **Add app** and choose the **Web** icon (`</>`).
-2. Enter an app nickname (example: `random-swap-web`).
-3. Do not enable Firebase Hosting here (GitHub Pages is used for this project).
-4. Finish and copy the config values shown by Firebase.
-
-### 3) Enable Realtime Database
-
-1. In left menu, open **Build > Realtime Database**.
-2. Click **Create Database**.
-3. Choose a location close to your users.
-4. For quick testing, start in test mode (you will tighten rules later).
-
-### 4) Paste config into this project
-
-Open `js/firebase.js` and replace all `REPLACE_ME` fields in:
-
-```js
-const firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME",
-  databaseURL: "REPLACE_ME",
-  projectId: "REPLACE_ME",
-  appId: "REPLACE_ME",
-};
+```bash
+python3 -m http.server 5173
 ```
 
-Use the corresponding values from Firebase:
+3. Open `http://localhost:5173/index.html`.
+4. Create a room on one device/browser, join from another.
 
-- `apiKey` -> `apiKey`
-- `authDomain` -> `authDomain`
-- `databaseURL` -> `databaseURL` (must be your Realtime DB URL)
-- `projectId` -> `projectId`
-- `appId` -> `appId`
+## Firebase setup
 
-### 5) Set Realtime Database rules (development)
+1. Create a Firebase project.
+2. Add a Web app and copy config values.
+3. Enable:
+   - Realtime Database
+   - Anonymous Authentication
+4. Paste config into `js/firebase.js`.
+5. Publish your Realtime Database rules.
 
-In **Realtime Database > Rules**, paste:
-
-```json
-{
-  "rules": {
-    "rooms": {
-      ".read": true,
-      ".write": true
-    }
-  }
-}
-```
-
-Publish rules.
+Note: frontend Firebase config values are public in web apps; protect access with strict database rules.
 
 ## Optional audio assets
 
-The game now supports optional voice/BGM files:
+Drop these files in `assets/audio/`:
 
-- `assets/audio/run-voice.mp3` (played on swap when role becomes Runner)
-- `assets/audio/bgm.mp3` (looping background music)
+- `run-voice.mp3` (used for `RUN!`)
+- `bgm.mp3` (looping background music)
+- `chase-voice.mp3` (optional; otherwise browser speech is used for `CHASE!`)
 
-If these files are missing:
+If missing, the game falls back to speech / generated SFX.
 
-- `RUN!` falls back to browser speech synthesis
-- `CHASE!` uses speech synthesis by default
-- generated beep SFX still work for collect/tag/swap
+## Gameplay rules
 
-### 6) Run locally and verify
-
-1. Start a local server in this folder:
-
-```bash
-python3 -m http.server 5173
-```
-
-2. Open `http://localhost:5173/index.html`.
-3. Click **Create Room** in one browser/device.
-4. Join using the same room code on another browser/device.
-5. Verify both clients can move and see synced gameplay.
-
-If you still see `Firebase config missing`, re-check `js/firebase.js` for any remaining `REPLACE_ME`.
-
-## Local setup (quick recap)
-
-1. Complete Firebase setup above.
-2. Serve the folder locally.
-3. Open `index.html` and test with two devices/tabs.
-
-Example quick server:
-
-```bash
-python3 -m http.server 5173
-```
-
-Then open `http://localhost:5173/index.html`.
-
-## Firebase rules notes
-
-The rule block above is only for development and public demos. For production, tighten access so users can only read/write their own room paths and add expiration/cleanup logic for old rooms.
-
-```json
-{
-  "rules": {
-    "rooms": {
-      ".read": true,
-      ".write": true
-    }
-  }
-}
-```
+- Up to 3 rounds per match
+- Runner objective: collect role runner dots
+- Chaser objective: tag runner
+- Role swaps occur at random intervals
+- Final result screen appears when match ends
 
 ## Deploy to GitHub Pages
 
-1. Create a new GitHub repo and push this folder.
-2. In repo settings, enable GitHub Pages and choose branch/folder.
-3. Open deployed URL and share room code/link with partner.
+1. Push repository to GitHub.
+2. In repo settings, open **Pages**.
+3. Set source to branch `main` and folder `/ (root)`.
+4. Save and wait for publish.
 
-## Gameplay defaults
+Your game URL will be:
 
-- Best of 3 rounds
-- Runner wins round by collecting 5 orbs
-- Chaser wins round by 2 tags
-- Random role swap every 10-20s
-- Fairness guards:
-  - 1.2s pre-swap cue
-  - 8s minimum cooldown between swaps
-  - 1s post-swap protection
+`https://<your-username>.github.io/random-swap-coop-game/`
+
+## Custom domain notes
+
+- GitHub Pages default subdomain is free (`github.io`).
+- A true `.io` domain is usually paid, not free.
+- If you get a custom domain, add it in GitHub Pages settings and create a `CNAME` record at your DNS provider.
