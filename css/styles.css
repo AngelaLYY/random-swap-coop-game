@@ -79,6 +79,35 @@ button {
   font-size: 14px;
 }
 
+.instructions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #ffffff20;
+}
+
+.instructions-title {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.instructions-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.instructions-list li {
+  margin-bottom: 6px;
+}
+
+.instructions-list li:last-child {
+  margin-bottom: 0;
+}
+
 .created-room {
   background: #0f1634;
   border: 1px solid #ffffff2b;
@@ -202,7 +231,11 @@ button {
 
 .mobile-controls {
   position: fixed;
-  inset: auto 12px 12px 12px;
+  /* Thumb-friendly zone: respect safe area on iPhone (notch, home indicator) */
+  left: max(12px, env(safe-area-inset-left));
+  right: 12px;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  top: auto;
   display: flex;
   justify-content: flex-start;
   align-items: flex-end;
@@ -210,27 +243,90 @@ button {
   pointer-events: none;
 }
 
+/* Invisible hit area for dynamic joystick: left half of screen on touch devices */
+.mobile-controls-touch-zone {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 50%;
+  height: 100%;
+  z-index: 51;
+  pointer-events: none;
+}
+
+.mobile-controls-touch-zone.active {
+  pointer-events: auto;
+}
+
 .joystick-base {
   pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Prevent tap highlight and callout on iOS */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Dynamic mode (touch): joystick is positioned where user first touches */
+.joystick-base.dynamic {
+  position: fixed;
+  left: max(20px, env(safe-area-inset-left));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  top: auto;
+  right: auto;
 }
 
 .joystick-base {
   width: 110px;
   height: 110px;
   border-radius: 50%;
-  background: #ffffff1e;
-  border: 1px solid #fff4;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px solid rgba(255, 255, 255, 0.35);
   position: relative;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.joystick-base:active {
+  transform: scale(1.02);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
 
 .joystick-knob {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: #ffffff8a;
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.6);
   position: absolute;
   left: 29px;
   top: 29px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  transition: box-shadow 0.1s ease;
+  pointer-events: none;
+}
+
+.joystick-base.active .joystick-knob {
+  box-shadow: 0 4px 16px rgba(142, 249, 243, 0.4);
+}
+
+/* Larger, higher-contrast joystick on touch devices for easier thumb control */
+@media (max-width: 900px), (pointer: coarse) {
+  .joystick-base {
+    width: 130px;
+    height: 130px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .joystick-knob {
+    width: 60px;
+    height: 60px;
+    left: 35px;
+    top: 35px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+  }
 }
 
 .status-line {

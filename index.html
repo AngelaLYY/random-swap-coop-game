@@ -9,7 +9,7 @@
   <body class="landing">
     <main class="card">
       <h1>Random Swap Co-op</h1>
-      <p class="subtitle">Cute chaos for two players. Roles swap at random.</p>
+      <p class="subtitle">A cozy two-player chase game made for long-distance couples. One runs, one chases—then your roles swap at random. Stay close even when you’re far apart.</p>
 
       <section class="form-block">
         <button id="createRoomBtn" class="primary">Create Room</button>
@@ -34,7 +34,16 @@
       </section>
 
       <section id="status" class="status">Ready.</section>
-      <p class="hint">Tip: configure Firebase in <code>js/firebase.js</code> before multiplayer.</p>
+
+      <section class="instructions">
+        <h2 class="instructions-title">How to play</h2>
+        <ul class="instructions-list">
+          <li><strong>Runner</strong> — Collect the green dots before you get tagged.</li>
+          <li><strong>Chaser</strong> — Tag the runner to score.</li>
+          <li><strong>Random swap</strong> — Your roles switch at random during the round. Watch and listen for the “RUN!” or “CHASE!” cue.</li>
+          <li>Up to <strong>3 rounds</strong> per match. The game ends when the match is over.</li>
+        </ul>
+      </section>
     </main>
 
     <script type="module" src="./js/lobby.js"></script>
