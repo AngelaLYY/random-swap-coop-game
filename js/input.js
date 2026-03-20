@@ -1,6 +1,7 @@
 export function createInputController() {
   const state = { x: 0, y: 0, actionPressed: false };
   const keys = new Set();
+  let resetFn = () => {};
 
   function applyKeys() {
     state.x = (keys.has("ArrowRight") || keys.has("d") ? 1 : 0) - (keys.has("ArrowLeft") || keys.has("a") ? 1 : 0);
@@ -19,7 +20,24 @@ export function createInputController() {
   const base = document.getElementById("joystickBase");
   const knob = document.getElementById("joystickKnob");
   const touchZone = document.getElementById("joystickTouchZone");
+  const canvas = document.getElementById("gameCanvas");
   const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+  const uaLower = typeof navigator !== "undefined" ? navigator.userAgent.toLowerCase() : "";
+  const pointerCoarse = Boolean(window.matchMedia?.("(pointer: coarse)")?.matches);
+  const hoverNone = Boolean(window.matchMedia?.("(hover: none)")?.matches);
+  const isWindows = uaLower.includes("windows");
+
+  // Only enable touch joystick UX on touch-first devices (phones/tablets).
+  // This avoids showing joystick UX on desktop/laptops that have a mouse/hover.
+  const canUseTouchControls = /android|iphone|ipad|ipod/i.test(uaLower) || (isTouchDevice && pointerCoarse && hoverNone && !isWindows);
+
+  if (!canUseTouchControls) {
+    return {
+      get: () => ({ ...state }),
+      reset: () => resetFn(),
+    };
+  }
 
   function hapticLight() {
     if (typeof navigator.vibrate === "function") navigator.vibrate(10);
@@ -55,8 +73,15 @@ export function createInputController() {
       const ny = (dy / m) * clamped;
       knob.style.left = `${knobOffsetPx + nx}px`;
       knob.style.top = `${knobOffsetPx + ny}px`;
-      state.x = nx / maxR;
-      state.y = ny / maxR;
+      const stickCap = 0.8;
+      const radialGain = 1.1;
+      const ux = dx / m;
+      const uy = dy / m;
+      const t = Math.min(1, Math.max(0, (clamped / maxR) * radialGain));
+      const curved = Math.pow(t, 1.06);
+      const mag = curved * stickCap;
+      state.x = ux * mag;
+      state.y = uy * mag;
     };
 
     const reset = () => {
@@ -66,6 +91,7 @@ export function createInputController() {
       state.y = 0;
       base.classList.remove("active");
     };
+    resetFn = reset;
 
     const up = () => {
       active = false;
@@ -77,7 +103,16 @@ export function createInputController() {
       if (e.pointerType === "mouse" && isTouchDevice && touchZone) return;
       active = true;
       base.classList.add("active");
-      base.setPointerCapture(e.pointerId);
+      try {
+        window.dispatchEvent(new CustomEvent("softjoystick:started"));
+      } catch {
+        // ignore
+      }
+      try {
+        base.setPointerCapture?.(e.pointerId);
+      } catch {
+        // Pointer capture can throw on some iOS Safari versions; ignore.
+      }
       updateGeometry();
       onMove(e.clientX, e.clientY);
       hapticLight();
@@ -96,6 +131,14 @@ export function createInputController() {
       const safeBottomPx = 24; /* reserve space above home indicator / safe area */
       touchZone.addEventListener("pointerdown", (e) => {
         if (active) return;
+        // Only capture touches that begin inside the play canvas.
+        // This prevents the joystick touch zone from blocking HUD/buttons.
+        if (canvas) {
+          const r = canvas.getBoundingClientRect();
+          const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+          if (!inside) return;
+        }
+
         e.preventDefault();
         updateGeometry();
         const rect = base.getBoundingClientRect();
@@ -110,7 +153,16 @@ export function createInputController() {
         updateGeometry();
         active = true;
         base.classList.add("active");
-        touchZone.setPointerCapture(e.pointerId);
+        try {
+          window.dispatchEvent(new CustomEvent("softjoystick:started"));
+        } catch {
+          // ignore
+        }
+        try {
+          touchZone.setPointerCapture?.(e.pointerId);
+        } catch {
+          // Pointer capture can throw on some iOS Safari versions; ignore.
+        }
         onMove(e.clientX, e.clientY);
         hapticLight();
       });
@@ -124,6 +176,17 @@ export function createInputController() {
   }
 
   return {
-    get: () => ({ ...state }),
+    get: () => {
+      if (!base || !knob) {
+        return { ...state };
+      }
+      const x = state.x;
+      const y = state.y;
+      // Tiny dead zone: filter thumb noise when trying to hold still.
+      const mag = Math.hypot(x, y);
+      if (mag < 0.03) return { x: 0, y: 0, actionPressed: Boolean(state.actionPressed) };
+      return { x, y, actionPressed: Boolean(state.actionPressed) };
+    },
+    reset: () => resetFn(),
   };
 }

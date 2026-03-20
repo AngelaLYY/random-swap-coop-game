@@ -6,7 +6,7 @@ import {
   initFirebase,
   joinRoom,
   makeRoomCode,
-} from "./firebase.js";
+} from "./firebase.js?v=20260319-2";
 
 const statusEl = document.getElementById("status");
 const roomInput = document.getElementById("roomCodeInput");

@@ -4,6 +4,15 @@
   --accent: #8ef9f3;
   --accent-2: #f9a8d4;
   --text: #f4f7ff;
+  --chrome-top: 0px;
+  --chrome-bottom: 0px;
+  --chrome-left: 0px;
+  --chrome-right: 0px;
+  --vv-width: 100vw;
+  --hud-bottom: 92px;
+  --vh: 1vh;
+  --hud-ui-scale: 1;
+  --playfield-gutter-x: 0px;
 }
 
 * {
@@ -15,6 +24,12 @@ body {
   background: radial-gradient(circle at top, #23295a, var(--bg));
   color: var(--text);
   font-family: ui-rounded, system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
 }
 
 .landing {
@@ -132,57 +147,266 @@ button {
 
 .game {
   overflow: hidden;
+  min-height: calc(var(--vh) * 100);
 }
 
 .hud {
   position: fixed;
-  inset: 10px 10px auto 10px;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+  left: calc(max(10px, env(safe-area-inset-left)) + var(--chrome-left));
+  right: calc(max(10px, env(safe-area-inset-right)) + var(--chrome-right));
+  top: calc(max(10px, env(safe-area-inset-top)) + var(--chrome-top));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: calc(8px * var(--hud-ui-scale));
   z-index: 30;
 }
 
+/* Shared HUD cell typography; chip chrome is only on real chips, not .hud-invite-wrap (avoids double box). */
 .hud > * {
-  background: #10162ed4;
-  border: 1px solid #ffffff2d;
-  padding: 8px 10px;
-  border-radius: 12px;
+  box-sizing: border-box;
+  min-width: 0;
   text-align: center;
   font-weight: 600;
-  font-size: 14px;
+  font-size: calc(14px * var(--hud-ui-scale));
 }
 
-#progressInfo {
-  font-size: 12px;
+.hud > *:not(.hud-invite-wrap) {
+  background: #10162ed4;
+  border: 1px solid #ffffff2d;
+  padding: calc(8px * var(--hud-ui-scale)) calc(10px * var(--hud-ui-scale));
+  border-radius: calc(12px * var(--hud-ui-scale));
 }
 
-.exit-game-btn {
-  position: fixed;
-  left: max(10px, env(safe-area-inset-left));
-  top: 66px;
-  z-index: 31;
-  background: #0f1734d9;
-  border: 1px solid #ffffff3f;
-  color: #e8ebff;
-  border-radius: 10px;
-  padding: 6px 12px;
-  font-size: 14px;
+.hud .hud-score {
+  flex: 1 1 140px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.hud .hud-timer {
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 4.25rem;
+  padding-left: calc(6px * var(--hud-ui-scale));
+  padding-right: calc(6px * var(--hud-ui-scale));
+}
+
+.hud .hud-btn {
+  flex: 0 1 auto;
+  cursor: pointer;
+  font: inherit;
   font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.hud .hud-btn:active {
+  opacity: 0.92;
+}
+
+.hud #roundInfo {
+  flex: 0 1 auto;
+}
+
+.hud #rolePill {
+  flex: 0 1 auto;
+}
+
+.hud-exit {
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  background: #293062 !important;
+  border: 1px solid #ffffff4f !important;
+  flex: 0 0 auto;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.hud-exit--narrow {
+  width: max-content;
+  max-width: 5.5rem;
+  padding-left: calc(8px * var(--hud-ui-scale)) !important;
+  padding-right: calc(8px * var(--hud-ui-scale)) !important;
+}
+
+.hud-exit:active {
+  opacity: 0.9;
+}
+
+/* Invisible shell: dropdown anchor + flex width like score column; single visible pill is the trigger only. */
+.hud > .hud-invite-wrap {
+  position: relative;
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 100%;
+  overflow: visible;
+  display: flex;
+  align-items: stretch;
+  align-self: stretch;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.hud-invite-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: calc(8px * var(--hud-ui-scale)) calc(10px * var(--hud-ui-scale));
+  border: 1px solid #ffffff2d;
+  border-radius: calc(12px * var(--hud-ui-scale));
+  background: #10162ed4;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: calc(14px * var(--hud-ui-scale));
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.hud-invite-trigger:active {
+  opacity: 0.92;
+}
+
+.invite-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 196px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid #ffffff33;
+  background: #0f1734f2;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  z-index: 95;
+  display: grid;
+  gap: 6px;
+}
+
+.invite-menu.hidden {
+  display: none;
+}
+
+.invite-menu-item {
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #ffffff2b;
+  background: #0a122bd6;
+  color: var(--text);
+  font: inherit;
+  font-size: calc(13px * var(--hud-ui-scale));
+  font-weight: 600;
+  text-align: left;
   cursor: pointer;
 }
 
-.audio-toggle {
+.invite-menu-item:active {
+  opacity: 0.9;
+}
+
+@media (max-width: 420px) {
+  .invite-menu {
+    left: auto;
+    right: 0;
+    min-width: min(196px, calc(100vw - 24px));
+  }
+}
+
+/* Phone landscape: compact HUD row */
+body[data-display-mode="phone-landscape"] .hud {
+  gap: calc(6px * var(--hud-ui-scale));
+}
+
+body[data-display-mode="phone-landscape"] .hud > *:not(.hud-invite-wrap) {
+  padding: calc(6px * var(--hud-ui-scale)) calc(8px * var(--hud-ui-scale));
+  border-radius: calc(10px * var(--hud-ui-scale));
+}
+
+body[data-display-mode="phone-landscape"] .hud .hud-btn {
+  font-size: calc(11px * var(--hud-ui-scale));
+  padding-left: calc(6px * var(--hud-ui-scale));
+  padding-right: calc(6px * var(--hud-ui-scale));
+}
+
+body[data-display-mode="phone-landscape"] .hud-invite-trigger {
+  padding: calc(6px * var(--hud-ui-scale)) calc(8px * var(--hud-ui-scale));
+  font-size: calc(11px * var(--hud-ui-scale));
+  border-radius: calc(10px * var(--hud-ui-scale));
+}
+
+body[data-display-mode="phone-landscape"] .hud .hud-timer {
+  max-width: 3.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.display-settings-panel {
   position: fixed;
-  right: max(10px, env(safe-area-inset-right));
-  top: 66px;
-  z-index: 31;
-  background: #0f1734d9;
-  border: 1px solid #ffffff3f;
-  color: #e8ebff;
-  border-radius: 10px;
-  padding: 6px 10px;
-  font-size: 12px;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 10, 31, 0.62);
+}
+
+.display-settings-panel.hidden {
+  display: none;
+}
+
+.display-settings-card {
+  width: min(520px, calc(100vw - 24px));
+  border-radius: 18px;
+  border: 1px solid #ffffff33;
+  background: #0f1734f2;
+  padding: 16px;
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.45);
+}
+
+.display-settings-title {
+  font-size: 16px;
+  font-weight: 850;
+  margin-bottom: 10px;
+}
+
+.display-settings-options {
+  display: grid;
+  gap: 10px;
+}
+
+.display-settings-options button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #ffffff2b;
+  background: #0a122bd6;
+  color: var(--text);
+}
+
+.display-settings-options button.selected {
+  border-color: rgba(142, 249, 243, 0.65);
+  box-shadow: 0 0 0 2px rgba(142, 249, 243, 0.18) inset;
+}
+
+.display-settings-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .pill.runner {
@@ -196,9 +420,117 @@ button {
 }
 
 #gameCanvas {
+  position: fixed;
+  /* Promote to GPU layer to reduce iOS compositing stutter */
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  top: var(--hud-bottom);
+  left: calc(env(safe-area-inset-left) + var(--chrome-left) + var(--playfield-gutter-x));
+  right: auto;
+  bottom: calc(env(safe-area-inset-bottom) + var(--chrome-bottom));
+  width: calc(
+    var(--vv-width)
+    - env(safe-area-inset-left)
+    - env(safe-area-inset-right)
+    - (var(--playfield-gutter-x) * 2)
+  );
+  height: calc(
+    (var(--vh) * 100)
+    - var(--hud-bottom)
+    - var(--chrome-bottom)
+    - env(safe-area-inset-bottom)
+  );
+  /* Canvas is visual-only; keep touch/clicks for HUD + joystick layers */
+  pointer-events: none;
+  z-index: 0;
+}
+
+.orientation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 10, 31, 0.7);
+  backdrop-filter: blur(6px);
+  padding: 20px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.orientation-card {
+  max-width: 520px;
+  border-radius: 18px;
+  border: 1px solid #ffffff33;
+  background: #0f1734f2;
+  padding: 18px 16px;
+  pointer-events: auto;
+}
+
+.orientation-card h2 {
+  margin: 10px 0 6px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.orientation-card p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.rotate-icon {
+  width: 140px;
+  height: 140px;
+  margin: 6px auto 0;
+  border-radius: 22px;
+  border: 2px solid #ffffff40;
+  background: radial-gradient(circle at 30% 25%, #8ef9f3 0%, #0f1224 55%);
+  position: relative;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  animation: rotateHint 1.2s ease-in-out infinite;
+}
+
+.rotate-icon::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 86px;
+  transform: translate(-50%, -50%);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 2px solid rgba(255, 255, 255, 0.4);
+}
+
+.rotate-icon::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border-radius: 16px;
+  border: 2px dashed rgba(255, 255, 255, 0.22);
+}
+
+@keyframes rotateHint {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(90deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.portrait-lock #joystickTouchZone {
+  /* Keep joystick available in portrait so phone users can play. */
   display: block;
-  width: 100vw;
-  height: 100vh;
+}
+
+.portrait-lock .mobile-controls {
+  display: flex;
 }
 
 .swap-cue {
@@ -244,6 +576,185 @@ button {
   display: none;
 }
 
+.mobile-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.notice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 75;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 10, 31, 0.65);
+  /* Avoid heavy blur covering the whole game on iOS */
+  backdrop-filter: none;
+  padding: 0 20px;
+  box-sizing: border-box;
+  text-align: center;
+  pointer-events: none;
+}
+
+.notice-overlay.hidden {
+  display: none !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* Spotlight orientation / display guide (pre-game only) */
+.display-guide-spotlight {
+  position: fixed;
+  inset: 0;
+  z-index: 76;
+  pointer-events: none;
+}
+
+.display-guide-spotlight.hidden {
+  display: none !important;
+}
+
+.display-guide-shade {
+  position: fixed;
+  background: rgba(5, 10, 31, 0.82);
+  pointer-events: auto;
+}
+
+.display-guide-hole-ring {
+  position: fixed;
+  border-radius: 14px;
+  border: 2px solid rgba(142, 249, 243, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.2),
+    0 0 24px rgba(142, 249, 243, 0.35);
+  pointer-events: none;
+  z-index: 77;
+}
+
+.display-guide-card--spotlight {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: max(24px, env(safe-area-inset-bottom));
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(46vh, 320px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid #ffffff44;
+  background: #0f1734fa;
+  padding: 16px 14px;
+  pointer-events: auto;
+  z-index: 78;
+  text-align: left;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+.display-guide-card--spotlight h2 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 850;
+}
+
+.display-guide-card--spotlight p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.94;
+}
+
+.display-guide-step {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.display-guide-actions {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.display-guide-actions button {
+  width: 100%;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #ffffff2b;
+  background: #0a122bd6;
+  color: var(--text);
+}
+
+.display-guide-next {
+  background: linear-gradient(90deg, var(--accent), #86efac) !important;
+  color: #032726 !important;
+  font-weight: 800;
+  border-color: transparent !important;
+}
+
+.notice-card {
+  max-width: 620px;
+  /* Keep the card visible even when iOS safe-area/cutouts apply in landscape. */
+  max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid #ffffff33;
+  background: #0f1734f2;
+  padding: 18px 16px;
+  pointer-events: auto;
+}
+
+.notice-block.hidden {
+  display: none;
+}
+
+.notice-card h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.notice-card p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.92;
+}
+
+.mobile-hint-card {
+  pointer-events: none;
+  max-width: 520px;
+  border-radius: 18px;
+  border: 1px solid #ffffff33;
+  background: #0f1734f2;
+  padding: 18px 16px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: hintIn 220ms ease-out forwards;
+}
+
+.mobile-hint-card h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 850;
+}
+
+.mobile-hint-card p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+@keyframes hintIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .mobile-controls {
   position: fixed;
   /* Thumb-friendly zone: respect safe area on iPhone (notch, home indicator) */
@@ -258,15 +769,29 @@ button {
   pointer-events: none;
 }
 
-/* Invisible hit area for dynamic joystick: left half, below HUD/buttons so Exit and HUD stay tappable */
+/* Invisible hit area for dynamic joystick: full width below HUD/buttons */
 .mobile-controls-touch-zone {
   position: fixed;
-  left: 0;
-  top: 110px; /* below HUD (~66px) + padding so Exit/Audio and HUD receive taps */
-  width: 50%;
-  height: calc(100% - 110px);
-  z-index: 51;
+  left: calc(env(safe-area-inset-left) + var(--chrome-left) + var(--playfield-gutter-x));
+  /* below HUD/buttons so Exit/Audio and HUD receive taps */
+  top: calc(var(--hud-bottom) + 8px);
+  right: auto;
+  width: calc(
+    var(--vv-width)
+    - env(safe-area-inset-left)
+    - env(safe-area-inset-right)
+    - (var(--playfield-gutter-x) * 2)
+  );
+  bottom: 0;
+  /* Below HUD/buttons so taps always reach them. */
+  z-index: 10;
   pointer-events: none;
+  touch-action: none;
+}
+
+/* iPhone landscape: add a bit of horizontal gutter to avoid Safari side clipping */
+body[data-display-mode="phone-landscape"] {
+  --playfield-gutter-x: 14px;
 }
 
 .mobile-controls-touch-zone.active {
@@ -292,55 +817,83 @@ button {
 }
 
 .joystick-base {
-  width: 110px;
-  height: 110px;
+  width: 86px;
+  height: 86px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: 2px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.055);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
   position: relative;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
 }
 
 .joystick-base:active {
   transform: scale(1.02);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.3);
 }
 
 .joystick-knob {
-  width: 52px;
-  height: 52px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.62);
+  border: 1.5px solid rgba(255, 255, 255, 0.38);
   position: absolute;
-  left: 29px;
-  top: 29px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  left: 26px;
+  top: 26px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.18);
   transition: box-shadow 0.1s ease;
   pointer-events: none;
 }
 
 .joystick-base.active .joystick-knob {
-  box-shadow: 0 4px 16px rgba(142, 249, 243, 0.4);
+  box-shadow: 0 3px 12px rgba(142, 249, 243, 0.28);
 }
 
-/* Larger, higher-contrast joystick on touch devices for easier thumb control */
+/* Coarse pointers: still compact; was oversized and hid playfield */
 @media (max-width: 900px), (pointer: coarse) {
   .joystick-base {
-    width: 130px;
-    height: 130px;
-    background: rgba(255, 255, 255, 0.18);
-    border: 2px solid rgba(255, 255, 255, 0.5);
+    width: 94px;
+    height: 94px;
+    background: rgba(255, 255, 255, 0.065);
+    border: 1.5px solid rgba(255, 255, 255, 0.26);
   }
 
   .joystick-knob {
-    width: 60px;
-    height: 60px;
-    left: 35px;
-    top: 35px;
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid rgba(255, 255, 255, 0.7);
+    width: 38px;
+    height: 38px;
+    left: 28px;
+    top: 28px;
+    background: rgba(255, 255, 255, 0.68);
+    border: 1.5px solid rgba(255, 255, 255, 0.42);
+  }
+}
+
+/* Soft/hidden joystick UX on touch devices:
+   - hide visuals by default
+   - show while steering ('.active') */
+.joystick-base {
+  opacity: 0;
+  transition: opacity 160ms ease, transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.joystick-base.active {
+  /* Stay translucent while steering so dots/orbs remain visible underneath */
+  opacity: 0.78;
+}
+
+/* Touch controls should only appear on touch-first devices (phones). */
+#joystickTouchZone,
+.mobile-controls {
+  display: none;
+}
+
+@media (pointer: coarse), (hover: none) {
+  #joystickTouchZone {
+    display: block;
+  }
+  .mobile-controls {
+    display: flex;
   }
 }
 
@@ -411,5 +964,36 @@ button {
     margin: 0 auto;
     left: 0;
     right: 0;
+  }
+}
+
+@media (orientation: landscape) {
+  .hud {
+    top: calc(max(6px, env(safe-area-inset-top)) + var(--chrome-top));
+    gap: 6px;
+  }
+
+  .hud > *:not(.hud-invite-wrap) {
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+
+  .hud-invite-trigger {
+    padding: 6px 8px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hud .hud-btn {
+    font-size: calc(11px * var(--hud-ui-scale));
+  }
+
+  .hud #hudSoundBtn {
+    /* "Sound: Off" still fits on one line */
+    padding-left: calc(5px * var(--hud-ui-scale));
+    padding-right: calc(5px * var(--hud-ui-scale));
   }
 }

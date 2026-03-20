@@ -54,11 +54,12 @@ Note: frontend Firebase config values are public in web apps; protect access wit
 
 Drop these files in `assets/audio/`:
 
-- `run-voice.mp3` (used for `RUN!`)
+- `run-voice.mp3` (used for `RUN!`; if missing, browser speech says “RUN”)
 - `bgm.mp3` (looping background music)
-- `chase-voice.mp3` (optional; otherwise browser speech is used for `CHASE!`)
 
-If missing, the game falls back to speech / generated SFX.
+**Chaser cue** always uses the browser’s **read aloud** (`speechSynthesis`) for “CHASE” — no `chase-voice.mp3` file.
+
+If other clips are missing, the game falls back to speech / generated SFX where applicable.
 
 ## Gameplay rules
 

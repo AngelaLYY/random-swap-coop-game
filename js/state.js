@@ -1,4 +1,6 @@
-export const WORLD_SIZE = 1000;
+// Fixed landscape arena (3:2). Rendering will letterbox to fit.
+export const WORLD_W = 1350;
+export const WORLD_H = 900;
 export const ROUND_MS = 60_000;
 export const ORB_TARGET = 5;
 export const TAG_TARGET = 2;
@@ -10,8 +12,8 @@ export const SWAP_PROTECT_MS = 1_000;
 
 function randomPos(pad = 80) {
   return {
-    x: pad + Math.random() * (WORLD_SIZE - pad * 2),
-    y: pad + Math.random() * (WORLD_SIZE - pad * 2),
+    x: pad + Math.random() * (WORLD_W - pad * 2),
+    y: pad + Math.random() * (WORLD_H - pad * 2),
   };
 }
 
@@ -31,8 +33,10 @@ export function makeRoomState(hostId, guestId = null, now = Date.now()) {
     hostId,
     createdAt: now,
     players: {
-      [hostId]: { connected: true, updatedAt: now, displayName: "Player 1" },
-      ...(guestId ? { [guestId]: { connected: true, updatedAt: now, displayName: "Player 2" } } : {}),
+      [hostId]: { connected: true, updatedAt: now, displayName: "Player 1", displayGuideAck: false },
+      ...(guestId
+        ? { [guestId]: { connected: true, updatedAt: now, displayName: "Player 2", displayGuideAck: false } }
+        : {}),
     },
     inputs: {},
     match: {

@@ -5,12 +5,13 @@ import {
   SWAP_CUE_MS,
   SWAP_PROTECT_MS,
   TAG_TARGET,
-  WORLD_SIZE,
+  WORLD_H,
+  WORLD_W,
   nextSwapTime,
   resetRoundState,
-} from "./state.js";
+} from "./state.js?v=20260319-2";
 
-const BASE_SPEED = 520;
+const BASE_SPEED = 530;
 const RUNNER_MULT = 1.0;
 const CHASER_MULT = 1.14;
 const ORB_RADIUS = 18;
@@ -69,8 +70,8 @@ function ensureCharsForPlayers(state) {
   for (const id of ids) {
     if (!state.entities.chars[id]) {
       state.entities.chars[id] = {
-        x: 500,
-        y: 500,
+        x: WORLD_W / 2,
+        y: WORLD_H / 2,
         vx: 0,
         vy: 0,
         burstUntil: 0,
@@ -91,6 +92,13 @@ function nowMs() {
 
 export function canStartMatch(state) {
   return Object.keys(state.players || {}).length >= 2 && state.roles.runnerId && state.roles.chaserId;
+}
+
+/** Everyone in the room has dismissed the display guide (Firebase flag per player). */
+export function allPlayersDisplayGuideAcked(state) {
+  const ids = Object.keys(state.players || {});
+  if (ids.length < 2) return false;
+  return ids.every((id) => state.players[id]?.displayGuideAck === true);
 }
 
 export function ensureRoles(state) {
@@ -120,15 +128,21 @@ function simulateMovement(state, dtMs, now) {
   const inputs = state.inputs || {};
   Object.entries(state.entities.chars).forEach(([id, char]) => {
     const input = inputs[id] || { x: 0, y: 0 };
-    const dir = normalize({ x: input.x || 0, y: input.y || 0 });
+    const rawX = Number(input.x) || 0;
+    const rawY = Number(input.y) || 0;
+    // Joystick sends |v| in [0,1]; keys send ±1. Scale speed by magnitude so slight stick
+    // moves aren’t instantly full sprint (previously only direction was used).
+    const mag = Math.min(1, Math.hypot(rawX, rawY));
+    const dir = normalize({ x: rawX, y: rawY });
     const isRunner = state.roles.runnerId === id;
     let speed = BASE_SPEED * (isRunner ? RUNNER_MULT : CHASER_MULT);
     speed *= 1 + (char.speedBonus || 0);
+    speed *= mag;
     char.vx = dir.x * speed;
     char.vy = dir.y * speed;
     const step = dtMs / 1000;
-    char.x = clamp(char.x + char.vx * step, CHAR_RADIUS, WORLD_SIZE - CHAR_RADIUS);
-    char.y = clamp(char.y + char.vy * step, CHAR_RADIUS, WORLD_SIZE - CHAR_RADIUS);
+    char.x = clamp(char.x + char.vx * step, CHAR_RADIUS, WORLD_W - CHAR_RADIUS);
+    char.y = clamp(char.y + char.vy * step, CHAR_RADIUS, WORLD_H - CHAR_RADIUS);
   });
 }
 
@@ -145,8 +159,8 @@ function collectOrbFor(state, playerId, role, orb) {
     char.speedBonus = Math.min(0.55, (char.speedBonus || 0) + 0.05);
     state.events.message = "Chaser got bigger + faster";
   }
-  const x = 80 + Math.random() * (WORLD_SIZE - 160);
-  const y = 80 + Math.random() * (WORLD_SIZE - 160);
+  const x = 80 + Math.random() * (WORLD_W - 160);
+  const y = 80 + Math.random() * (WORLD_H - 160);
   orb.x = x;
   orb.y = y;
   orb.active = true;
@@ -217,6 +231,10 @@ export function stepGame(state, now, dtMs) {
   ensureRoles(state);
   if (!canStartMatch(state)) {
     state.events.message = "Waiting for second player...";
+    return state;
+  }
+  if (!allPlayersDisplayGuideAcked(state)) {
+    state.events.message = "Waiting for everyone to finish setup…";
     return state;
   }
   if (!state.match.started) {

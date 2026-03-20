@@ -1,5 +1,4 @@
 const RUN_VOICE_URL = "./assets/audio/run-voice.mp3";
-const CHASE_VOICE_URL = "./assets/audio/chase-voice.mp3";
 const BGM_URL = "./assets/audio/bgm.mp3";
 
 export function createAudioManager() {
@@ -9,9 +8,7 @@ export function createAudioManager() {
   let unlocked = false;
   let bgm = null;
   let runVoice = null;
-  let chaseVoice = null;
   let runVoiceOk = false;
-  let chaseVoiceOk = false;
   let bgmOk = false;
   let bgmStarted = false;
   let bgmRate = 1;
@@ -34,16 +31,6 @@ export function createAudioManager() {
       runVoiceOk = false;
     }
   );
-  chaseVoice = tryLoadAudio(
-    CHASE_VOICE_URL,
-    (audio) => {
-      chaseVoice = audio;
-      chaseVoiceOk = true;
-    },
-    () => {
-      chaseVoiceOk = false;
-    }
-  );
   bgm = tryLoadAudio(
     BGM_URL,
     (audio) => {
@@ -57,7 +44,6 @@ export function createAudioManager() {
     }
   );
   runVoice?.load?.();
-  chaseVoice?.load?.();
   bgm?.load?.();
 
   function unlock() {
@@ -78,7 +64,6 @@ export function createAudioManager() {
       } catch {}
     };
     warm(runVoice);
-    warm(chaseVoice);
     if (enabled && bgmOk && !bgmStarted) {
       bgmStarted = true;
       bgm.play().catch(() => {});
@@ -137,9 +122,8 @@ export function createAudioManager() {
       }
       beep(740, 0.09, "triangle", 0.07);
     } else {
-      if (!(chaseVoiceOk && playVoice(chaseVoice))) {
-        speak("CHASE");
-      }
+      // Chaser line uses browser speech only (no chase mp3 asset).
+      speak("CHASE");
       beep(280, 0.13, "sawtooth", 0.06);
     }
   }

@@ -12,7 +12,7 @@ import {
   set,
   update,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js";
-import { makeRoomState } from "./state.js";
+import { makeRoomState } from "./state.js?v=20260319-2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDQgJwIIyF78P-m9ja9dxIJM2G6SQZ2Xtc",
@@ -90,11 +90,35 @@ export async function joinRoom(roomId, playerId) {
     throw new Error("Room is full.");
   }
   const existing = players[uid];
-  await update(ref(database, `rooms/${roomId}/players/${uid}`), {
+  const patch = {
     connected: true,
     updatedAt: Date.now(),
     displayName: existing?.displayName || `Player ${Math.min(playerIds.length + 1, 2)}`,
+  };
+  if (existing?.displayGuideAck === undefined) {
+    patch.displayGuideAck = false;
+  }
+  await update(ref(database, `rooms/${roomId}/players/${uid}`), patch);
+}
+
+/** Call when the player finishes the display / spotlight guide (each client sets their own). */
+export async function pushPlayerDisplayGuideAck(roomId, playerId, ack = true) {
+  const uid = playerId || (await getAuthUid());
+  const database = initFirebase().db;
+  await update(ref(database, `rooms/${roomId}/players/${uid}`), {
+    displayGuideAck: Boolean(ack),
+    updatedAt: Date.now(),
   });
+}
+
+/** Host: reset so the spotlight can run again (e.g. Play again). */
+export async function resetRoomDisplayGuideAcks(roomId, playerIds) {
+  const database = initFirebase().db;
+  const updates = {};
+  for (const id of playerIds) {
+    updates[`rooms/${roomId}/players/${id}/displayGuideAck`] = false;
+  }
+  await update(ref(database), updates);
 }
 
 export function subscribeRoom(roomId, onChange) {

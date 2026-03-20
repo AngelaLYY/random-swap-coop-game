@@ -10,18 +10,93 @@
     <header class="hud">
       <div id="rolePill" class="pill">Role: -</div>
       <div id="roundInfo">Round 1 / 3</div>
-      <div id="timerInfo">60s</div>
-      <div id="scoreInfo">You 0 - Opp 0</div>
-      <div id="progressInfo">Runner dots 0/5 | Tags 0/2</div>
+      <div id="timerInfo" class="hud-timer">60s</div>
+      <div id="scoreInfo" class="hud-score">You 0 - Opp 0</div>
+      <button type="button" id="hudDisplayBtn" class="hud-btn">Display</button>
+      <button type="button" id="hudSoundBtn" class="hud-btn">Sound: On</button>
+      <div class="hud-invite-wrap">
+        <button
+          type="button"
+          id="hudInviteBtn"
+          class="hud-invite-trigger"
+          title="Invite a friend"
+          aria-label="Invite a friend"
+          aria-expanded="false"
+          aria-haspopup="menu"
+          aria-controls="inviteMenuPanel"
+        >
+          Invite
+        </button>
+        <div
+          id="inviteMenuPanel"
+          class="invite-menu hidden"
+          role="menu"
+          aria-hidden="true"
+        >
+          <button type="button" id="inviteCopyCodeBtn" class="invite-menu-item" role="menuitem">
+            Copy room code
+          </button>
+          <button type="button" id="inviteCopyLinkBtn" class="invite-menu-item" role="menuitem">
+            Copy invite link
+          </button>
+        </div>
+      </div>
+      <button type="button" id="hudExitBtn" class="hud-exit hud-exit--narrow">Exit</button>
     </header>
-    <button id="exitGameBtn" class="exit-game-btn" type="button">Exit</button>
-    <button id="audioToggle" class="audio-toggle">Sound: On</button>
+
+    <section id="displaySettingsPanel" class="display-settings-panel hidden" aria-hidden="true">
+      <div class="display-settings-card" role="dialog" aria-label="Display settings">
+        <div class="display-settings-title">Display</div>
+        <div class="display-settings-options">
+          <button id="panelSoundToggle" type="button">Sound: On</button>
+        </div>
+        <div class="display-settings-options">
+          <button type="button" data-display-mode="auto">Auto</button>
+          <button type="button" data-display-mode="desktop">Desktop</button>
+          <button type="button" data-display-mode="phone-landscape">Phone Landscape</button>
+          <button type="button" data-display-mode="phone-portrait">Phone Portrait</button>
+        </div>
+        <div class="display-settings-actions">
+          <button id="displaySettingsCloseBtn" type="button">Close</button>
+        </div>
+      </div>
+    </section>
 
     <section id="swapCue" class="swap-cue hidden">SWAP INCOMING</section>
     <section id="roleFlash" class="role-flash hidden">RUN!</section>
     <canvas id="gameCanvas" width="1000" height="1000" aria-label="Game canvas"></canvas>
+    <section id="displayGuideOverlay" class="display-guide-spotlight hidden" aria-hidden="true">
+      <div class="display-guide-shade display-guide-shade--top" id="displayGuideShadeTop" aria-hidden="true"></div>
+      <div class="display-guide-shade display-guide-shade--bottom" id="displayGuideShadeBottom" aria-hidden="true"></div>
+      <div class="display-guide-shade display-guide-shade--left" id="displayGuideShadeLeft" aria-hidden="true"></div>
+      <div class="display-guide-shade display-guide-shade--right" id="displayGuideShadeRight" aria-hidden="true"></div>
+      <div class="display-guide-hole-ring" id="displayGuideHoleRing" aria-hidden="true"></div>
+      <div class="display-guide-card display-guide-card--spotlight">
+        <h2 id="displayGuideTitle">Before you play</h2>
+        <p id="displayGuideText"></p>
+        <div class="display-guide-step" id="displayGuideStepHint"></div>
+        <div class="display-guide-actions">
+          <button id="displayGuideNextBtn" type="button" class="display-guide-next">Next</button>
+          <button id="displayGuideOpenBtn" type="button">Open Display settings</button>
+          <button id="displayGuideSkipBtn" type="button">Skip</button>
+          <button id="displayGuideDontShowBtn" type="button">Don’t show again</button>
+        </div>
+      </div>
+    </section>
+    <section id="noticeOverlay" class="notice-overlay hidden" aria-hidden="true">
+      <div class="notice-card">
+        <div id="noticePhone" class="notice-block">
+          <h2>Drag to move</h2>
+          <p>Touch anywhere below the HUD and drag to steer.</p>
+        </div>
+        <div id="noticeDesktop" class="notice-block hidden">
+          <h2>Keyboard controls</h2>
+          <p>Use the arrow keys or <code>WASD</code> to steer.</p>
+        </div>
+      </div>
+    </section>
 
-    <!-- Left-side touch zone: first touch places joystick there (touch devices only) -->
+    <!-- Touch zone: first touch places joystick there (touch devices only) -->
     <div id="joystickTouchZone" class="mobile-controls-touch-zone" aria-hidden="true"></div>
     <section class="mobile-controls">
       <div id="joystickBase" class="joystick-base">
@@ -42,6 +117,6 @@
     </section>
 
     <section id="statusLine" class="status-line">Connecting...</section>
-    <script type="module" src="./js/game.js"></script>
+    <script type="module" src="./js/game.js?v=20260321-4"></script>
   </body>
 </html>
